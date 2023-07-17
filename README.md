@@ -24,4 +24,4 @@ Projeto base é do [Dev Envolvente] (https://www.youtube.com/watch?v=G8rUCF3BY6s
 					<li class="nav-item"><a href="#">Contact</a></li>]
 15) Add ícone de pesquisa abaixo de li. Pra isso, pesquisar "search" em boxicons.com, escolher ícone, clicar nele, clicar em fonte, copiar código e colar abaixo de li. Exemplo: [<i class='bx bx-search'></i>]
 16) Abaixo da ul, criar div com classe "menu" [<div class="menu">]
-17) Indexada à div, criar span de classe "bar" [<span class="bar"></span>] e replicar duas vezes
+17) Indexada à div, criar span de classe "bar" [<span class="bar"></span>] e replicar duas vezes# SegundaLojaVirtual

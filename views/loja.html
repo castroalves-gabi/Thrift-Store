@@ -1,22 +1,25 @@
 <!DOCTYPE html>
-<html lang="Pt-br">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
-    <link rel="stylesheet" href="/css/style.css">
-    <title>Ammi Maju</title>
+    <link rel="stylesheet" href="/css/loja.css">
+    <title>Loja Ammi Maju</title>
 </head>
 <body>
     <header>
         <nav class="navigation">
             <a href="/views/index.html" class="logo">A<span>mm</span>i M<span>aj</span>u</a>
             <ul class="nav-menu">
-                <li class="nav-item"><a href="/views/index.html">Home</a></li>
+                <div class="search-box">
+                    <button class="search-button" onclick="searchFunction()"><i class='bx bx-search'></i></button>
+                    <input type="text" id="searchInput" placeholder="Jaqueta jeans..." onkeypress="handleKeyPress(event)">
+                </div>
                 <li class="nav-item"><a href="/views/sobre.html">Sobre</a></li>
                 <li class="nav-item"><a href="/views/contato.html">Contato</a></li>
                 <li class="nav-item"><a href="/views/loja.html">Loja</a></li>
-                <i class='bx bx-search'></i>
+                <button class="cart-button" onclick="goToCarrinho()"><i class='bx bx-cart'></i></button>
             </ul>
             <div class="menu">
                 <span class="bar"></span>
@@ -25,19 +28,15 @@
             </div>
         </nav>
     </header>
+
     <main>
-        <section class="home">
-            <div class="home-text">
-                <h4 class="text-h4">Brechó Ammi Maju</h4>
-                <h1 class="text-h1">Qualidade e preço baixo</h1>
-                <p> Roupas estilosas e de qualidade para pessoas que se preocupam com o bem estar social.</p>
-                <a href="/views/loja.html" class="home-btn">Comprar</a>
-            </div>
-            <div class="home-img">
-                <img src="/img/home.png" alt="roupas">
-            </div>
-        </section>
+        <div id="produtos">
+        </div>
+        <div id="carrinho">
+        </div>
     </main>
-    <script src="/js/script.js"></script>
+    
+    <script src="/js/loja.js"></script>
+
 </body>
 </html>
