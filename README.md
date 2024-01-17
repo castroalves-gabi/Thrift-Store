@@ -5,6 +5,8 @@ Este projeto é uma loja virtual desenvolvida utilizando JS. A finalidade é cri
 [Link do projeto
 ](https://gabrieli-thrift-store.vercel.app/)
 
+![thrift-store-ammi-maju](https://github.com/castroalves-gabi/BrechoLandingPage/assets/117552601/f752e860-fd67-42d2-9130-4a292a812b49)
+
 ****
 
 ![image](https://github.com/castroalves-gabi/BrechoLandingPage/assets/117552601/ae94196c-9d8b-40f4-9df0-d151833207bb)
