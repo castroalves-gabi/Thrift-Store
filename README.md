@@ -1,9 +1,14 @@
-# Loja Virtual utilizando JS puro
+# Loja Virtual 
+
+Este projeto é uma loja virtual desenvolvida utilizando JS. A finalidade é criar uma loja virtual para um brechó.
+
+[Link do projeto
+](https://gabrieli-thrift-store.vercel.app/)
+
+****
 
 ![image](https://github.com/castroalves-gabi/BrechoLandingPage/assets/117552601/ae94196c-9d8b-40f4-9df0-d151833207bb)
 
-
-Este projeto é uma loja virtual desenvolvida utilizando JavaScript puro. A finalidade é criar uma loja virtual para um brechó.
 
 A página principal consiste em um cabeçalho com um menu de navegação contendo links para diferentes seções, como "Sobre", "Contato" e "Loja". 
 
