@@ -1,6 +1,6 @@
 # Loja Virtual 
 
-Este projeto é uma loja virtual desenvolvida utilizando JS. A finalidade é criar uma loja virtual para um brechó.
+Loja virtual desenvolvida utilizando JS.
 
 [Link do projeto
 ](https://gabrieli-thrift-store.vercel.app/)
