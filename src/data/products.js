@@ -1,0 +1,32 @@
+export const products = [
+  {
+    id: 0,
+    nome: 'Camiseta Looney Toones',
+    valor: 29.99,
+    tamanho: 'M',
+    marca: 'Disney',
+    condicao: 'Nova',
+    img: '/img/produtos/camiseta.png',
+    detalhes: 'Camiseta infantil com estampa divertida',
+  },
+  {
+    id: 1,
+    nome: 'Short Jeans',
+    valor: 29.99,
+    tamanho: '40/M',
+    marca: 'Youcom',
+    condicao: 'Nova',
+    img: '/img/produtos/short.png',
+    detalhes: 'Short jeans feminino com cintura alta',
+  },
+  {
+    id: 2,
+    nome: 'Sapato Amarelo',
+    valor: 49.99,
+    tamanho: '38',
+    marca: 'Lolla',
+    condicao: 'Nova',
+    img: '/img/produtos/sapato.png',
+    detalhes: 'Sapato amarelo de salto alto',
+  },
+];
