@@ -30,13 +30,9 @@ Loja virtual em React e Vite, com catálogo e painel administrativo integrados a
 
 ## Desenvolvimento e validação
 
-`npm run dev` inicia somente o frontend Vite. Como as rotas em `api/` são funções serverless, use a Vercel CLI para testar o aplicativo integrado localmente:
+Para iniciar a loja com as funções de API, execute `npx vercel dev` na raiz do projeto e abra a URL informada pela CLI. A Vercel usa o script `dev` (`vite`) para iniciar o frontend e executa as funções em `api/` separadamente. `npm run dev` inicia somente o frontend e não serve para validar endpoints `/api/*`. O campo **Development Command** nas configurações do projeto Vercel deve estar vazio ou apontar para `npm run dev`/`vite`; nunca configure `vercel dev` nele, pois isso causa invocação recursiva.
 
-```sh
-npx vercel dev
-```
-
-Configure as variáveis no ambiente local da Vercel ou em `.env.local` antes de testar APIs. Sem credenciais e configuração do Supabase, checkout, administração, catálogo remoto, pagamentos e frete não estarão disponíveis.
+Configure as variáveis no ambiente local da Vercel ou em `.env.local` antes de testar APIs. Não copie nem compartilhe segredos em logs. Sem credenciais e configuração do Supabase, checkout, administração, catálogo remoto, pagamentos e frete não estarão disponíveis.
 
 ```sh
 npm test

@@ -3,8 +3,28 @@ import { createHmac } from 'node:crypto';
 import test from 'node:test';
 import { validateCoupon } from '../api/admin/coupons.js';
 import { validateLook } from '../api/admin/looks.js';
+import { requireAdmin } from '../server/supabase.js';
 import { normalizePostalCode, validateCartItems, validateProduct } from '../server/validation.js';
 import { verifyMercadoPagoSignature } from '../server/signatures.js';
+
+async function withSupabaseEnvironment(run) {
+  const previous = {
+    SUPABASE_URL: process.env.SUPABASE_URL,
+    SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY,
+    SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
+  };
+  process.env.SUPABASE_URL = 'https://supabase.example';
+  process.env.SUPABASE_ANON_KEY = 'test-anon-key';
+  process.env.SUPABASE_SERVICE_ROLE_KEY = 'test-service-key';
+  try {
+    await run();
+  } finally {
+    for (const [key, value] of Object.entries(previous)) {
+      if (value === undefined) delete process.env[key];
+      else process.env[key] = value;
+    }
+  }
+}
 
 test('normalizes Brazilian postal codes and rejects incomplete values', () => {
   assert.equal(normalizePostalCode('90000-000'), '90000000');
@@ -88,4 +108,65 @@ test('requires available products before publishing a look', () => {
   assert.throws(() => validateLook({ ...look, product_ids: [] }), /ao menos uma peça/);
   assert.throws(() => validateLook({ ...look, product_ids: [productId, productId] }), /peças repetidas/);
   assert.throws(() => validateLook(null), /dados da vitrine/);
+});
+
+test('requires a valid Supabase user and an admin profile for administrative access', async () => {
+  await withSupabaseEnvironment(async () => {
+    const originalFetch = globalThis.fetch;
+    const calls = [];
+    globalThis.fetch = async (url, options) => {
+      calls.push({ url: String(url), headers: options.headers });
+      if (String(url).endsWith('/auth/v1/user')) {
+        return new Response(JSON.stringify({ id: 'user-id' }), { status: 200 });
+      }
+      return new Response(JSON.stringify([{ role: 'admin' }]), { status: 200 });
+    };
+    try {
+      const user = await requireAdmin({ headers: { authorization: 'Bearer user-token' } });
+      assert.equal(user.id, 'user-id');
+      assert.equal(calls[0].headers.Authorization, 'Bearer user-token');
+      assert.equal(calls[0].headers.apikey, 'test-anon-key');
+      assert.equal(calls[1].headers.Authorization, 'Bearer test-service-key');
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+  });
+});
+
+test('rejects authenticated users without an admin profile', async () => {
+  await withSupabaseEnvironment(async () => {
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = async (url) => String(url).endsWith('/auth/v1/user')
+      ? new Response(JSON.stringify({ id: 'user-id' }), { status: 200 })
+      : new Response(JSON.stringify([{ role: 'customer' }]), { status: 200 });
+    try {
+      await assert.rejects(
+        requireAdmin({ headers: { authorization: 'Bearer user-token' } }),
+        { status: 403, message: 'Acesso restrito à administração.' },
+      );
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+  });
+});
+
+test('distinguishes an expired session from Supabase authentication service failures', async () => {
+  await withSupabaseEnvironment(async () => {
+    const originalFetch = globalThis.fetch;
+    try {
+      globalThis.fetch = async () => new Response('{}', { status: 401 });
+      await assert.rejects(
+        requireAdmin({ headers: { authorization: 'Bearer expired-token' } }),
+        { status: 401, message: 'A sessão expirou. Entre novamente.' },
+      );
+
+      globalThis.fetch = async () => new Response('{}', { status: 503 });
+      await assert.rejects(
+        requireAdmin({ headers: { authorization: 'Bearer user-token' } }),
+        { status: 503, message: 'Não foi possível validar a sessão no Supabase.' },
+      );
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+  });
 });

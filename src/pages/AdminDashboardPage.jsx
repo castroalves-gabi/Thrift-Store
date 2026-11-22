@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import PageMeta from '../components/PageMeta.jsx';
-import { adminRequest } from '../lib/api.js';
+import { adminRequest, getApiErrorMessage } from '../lib/api.js';
 import { supabase } from '../lib/supabase.js';
 import { formatPrice } from '../lib/format.js';
 
@@ -36,6 +36,8 @@ function ErrorBanner({ message }) {
 
 export default function AdminDashboardPage() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const loginSuccess = useRef(Boolean(location.state?.loginSuccess));
   const [tab, setTab] = useState('products');
   const [loading, setLoading] = useState(true);
   const [authorized, setAuthorized] = useState(false);
@@ -73,13 +75,18 @@ export default function AdminDashboardPage() {
       setLooks(lookResult.looks);
       setSettings((current) => ({ ...current, ...settingsResult.settings }));
       setAuthorized(true);
+      if (loginSuccess.current) {
+        loginSuccess.current = false;
+        setMessage('Login realizado com sucesso. Painel administrativo carregado.');
+        navigate(location.pathname, { replace: true, state: null });
+      }
     } catch (requestError) {
       setAuthorized(false);
-      setError(requestError.message);
+      setError(getApiErrorMessage(requestError));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [location.pathname, navigate]);
 
   useEffect(() => {
     loadAdminData();
@@ -138,7 +145,7 @@ export default function AdminDashboardPage() {
       setMessage('Peça salva.');
       await loadAdminData();
     } catch (saveError) {
-      setError(saveError.message);
+      setError(getApiErrorMessage(saveError));
     } finally {
       setSaving(false);
     }
@@ -151,7 +158,7 @@ export default function AdminDashboardPage() {
       setMessage('Peça retirada do catálogo.');
       await loadAdminData();
     } catch (requestError) {
-      setError(requestError.message);
+      setError(getApiErrorMessage(requestError));
     }
   }
 
@@ -175,7 +182,7 @@ export default function AdminDashboardPage() {
       setMessage('Cupom criado.');
       await loadAdminData();
     } catch (requestError) {
-      setError(requestError.message);
+      setError(getApiErrorMessage(requestError));
     } finally {
       setSaving(false);
     }
@@ -187,7 +194,7 @@ export default function AdminDashboardPage() {
       setMessage('Cupom desativado.');
       await loadAdminData();
     } catch (requestError) {
-      setError(requestError.message);
+      setError(getApiErrorMessage(requestError));
     }
   }
 
@@ -207,7 +214,7 @@ export default function AdminDashboardPage() {
       setMessage('Vitrine criada.');
       await loadAdminData();
     } catch (requestError) {
-      setError(requestError.message);
+      setError(getApiErrorMessage(requestError));
     } finally {
       setSaving(false);
     }
@@ -219,7 +226,7 @@ export default function AdminDashboardPage() {
       setMessage('Vitrine desativada.');
       await loadAdminData();
     } catch (requestError) {
-      setError(requestError.message);
+      setError(getApiErrorMessage(requestError));
     }
   }
 
@@ -232,7 +239,7 @@ export default function AdminDashboardPage() {
       setMessage('Status do pedido atualizado.');
       await loadAdminData();
     } catch (requestError) {
-      setError(requestError.message);
+      setError(getApiErrorMessage(requestError));
     }
   }
 
@@ -258,23 +265,47 @@ export default function AdminDashboardPage() {
       setMessage('Informações de retirada e entrega salvas.');
       await loadAdminData();
     } catch (requestError) {
-      setError(requestError.message);
+      setError(getApiErrorMessage(requestError));
     } finally {
       setSaving(false);
     }
   }
 
   async function signOut() {
-    if (supabase) await supabase.auth.signOut();
-    navigate('/admin/login');
+    try {
+      if (supabase) {
+        const { error: signOutError } = await supabase.auth.signOut();
+        if (signOutError) throw signOutError;
+      }
+      navigate('/admin/login', { state: { logoutSuccess: true } });
+    } catch (signOutError) {
+      console.error('Admin sign-out failed:', {
+        name: signOutError.name,
+        code: signOutError.code,
+        status: signOutError.status,
+      });
+      setError('Não foi possível encerrar a sessão. Tente novamente.');
+    }
   }
 
-  if (loading) return <main className="container page"><p className="loading-state">Validando acesso…</p></main>;
+  if (loading) {
+    return (
+      <main className="container page">
+        {loginSuccess.current && <p className="success-message" role="status">Login realizado com sucesso. Validando acesso e carregando o painel administrativo...</p>}
+        <p className="loading-state">Validando acesso…</p>
+      </main>
+    );
+  }
   if (!authorized) {
     return (
       <main className="container page">
         <ErrorBanner message={error} />
-        <div className="empty-state"><h1>Acesso administrativo</h1><p>Entre com uma conta autorizada para gerenciar a loja.</p><Link className="button" to="/admin/login">Entrar</Link></div>
+        <div className="empty-state">
+          <h1>Acesso administrativo</h1>
+          <p>O painel não foi carregado. Você pode tentar novamente sem perder a sessão atual.</p>
+          <button className="button" type="button" onClick={loadAdminData}>Tentar novamente</button>
+          {error.includes('sessão expirou') && <p><Link className="text-link" to="/admin/login">Entrar novamente</Link></p>}
+        </div>
       </main>
     );
   }
